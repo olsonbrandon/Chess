@@ -1,4 +1,10 @@
-var board = [new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8)];
+var board = [
+  [new Rook(0,0,'black'), new Knight(0,1,'black'), new Bishop(0,2,'black'), new Queen(0,3,'black'), new King(0,4,'black'), new Bishop(0,5,'black'), new Knight(0,6,'black'), new Rook(0,7,'black')],
+  [new Pawn(1,0,'black'), new Pawn(1,1,'black'), new Pawn(1,2,'black'), new Pawn(1,3,'black'), new Pawn(1,4,'black'), new Pawn(1,5,'black'), new Pawn(1,6,'black'), new Pawn(1,7,'black')],
+  new Array(8),new Array(8),new Array(8),new Array(8),
+  [new Pawn(6,0,'white'), new Pawn(6,1,'white'), new Pawn(6,2,'white'), new Pawn(6,3,'white'), new Pawn(6,4,'white'), new Pawn(6,5,'white'), new Pawn(6,6,'white'), new Pawn(6,7,'white')],
+  [new Rook(0,0,'white'), new Knight(0,1,'white'), new Bishop(0,2,'white'), new Queen(0,3,'white'), new King(0,4,'white'), new Bishop(0,5,'white'), new Knight(0,6,'white'), new Rook(0,7,'white')]];
+
 var currTurn = 'white';
 
 function Piece (row, col, color){
@@ -181,17 +187,53 @@ Pawn.prototype = new Piece();
 Pawn.prototype.getTargets = function() {
   var targets = [];
   var dir = this.color === 'black' ? 1 : -1;
-  if (isEmpty(this.row + 1, this.col)) {
+  var row = this.row + dir;
+  var col = this.col;
+  if (isOnBoard(row, col) && isEmpty(row, col)) {
     targets.push({
-      x: this.col,
-      y: this.row + dir
+      x: col,
+      y: row
     });
   }
-  if (!this.hasMoved && isEmpty(this.row + 1, this.col)) {
+  if (!this.hasMoved && isOnBoard(row, col) && isEmpty(row + dir, col)) {
     targets.push({
-      x: this.col,
-      y: this.row + 2 * dir
+      x: col,
+      y: row + dir
     });
+  }
+  if (isEnemy(row, col + 1)) {
+    targets.push({
+      x: row,
+      y: col + 1
+    });
+  }
+  if (isEnemy(row, col - 1)) {
+    targets.push({
+      x: row,
+      y: col - 1
+    });
+  }
+  return targets;
+};
+
+function King (row, col, color) {
+  Piece.call(this, row, col, color);
+  var baseImg = 'white' ? '2654' : '265A';
+  this.img = unicodeify(baseImg);
+}
+
+King.prototype = new Piece();
+King.prototype.getTargets = function (){
+  var targets = [];
+  for (var i = -1; i <= 1; i++) { //row offset
+    for (var j = -1; i <=1; j++) { // col offset
+      if (canMoveTo(this.row + i, this.col + j)) {
+        targets.push({
+          x: this.row + i,
+          y: this.col + j
+        });
+      }
+    }
   }
 };
 

@@ -11,7 +11,7 @@ $(document).ready(function(){
     }
   }
   function cellSetup(row, col, color) {
-    return $('<div id="' + row.toString() + row.toString() + '">').addClass('cell').addClass(color);
+    return $('<div id="' + row.toString() + col.toString() + '">').addClass('cell').addClass(color).addClass();
   }
   boardSetup();
 });
