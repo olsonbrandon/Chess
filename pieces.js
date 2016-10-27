@@ -1,10 +1,3 @@
-var board = [
-  [new Rook(0,0,'black'), new Knight(0,1,'black'), new Bishop(0,2,'black'), new Queen(0,3,'black'), new King(0,4,'black'), new Bishop(0,5,'black'), new Knight(0,6,'black'), new Rook(0,7,'black')],
-  [new Pawn(1,0,'black'), new Pawn(1,1,'black'), new Pawn(1,2,'black'), new Pawn(1,3,'black'), new Pawn(1,4,'black'), new Pawn(1,5,'black'), new Pawn(1,6,'black'), new Pawn(1,7,'black')],
-  new Array(8),new Array(8),new Array(8),new Array(8),
-  [new Pawn(6,0,'white'), new Pawn(6,1,'white'), new Pawn(6,2,'white'), new Pawn(6,3,'white'), new Pawn(6,4,'white'), new Pawn(6,5,'white'), new Pawn(6,6,'white'), new Pawn(6,7,'white')],
-  [new Rook(0,0,'white'), new Knight(0,1,'white'), new Bishop(0,2,'white'), new Queen(0,3,'white'), new King(0,4,'white'), new Bishop(0,5,'white'), new Knight(0,6,'white'), new Rook(0,7,'white')]];
-
 var currTurn = 'white';
 
 function Piece (row, col, color){
@@ -22,13 +15,13 @@ Piece.prototype.moveTo = function(x, y){
 };
 function Rook (row, col, color){
   Piece.call(this, row, col, color);
-  var baseImg = 'white' ? '2656' : '265C';
+  var baseImg = this.color === 'white' ? '2656' : '265C';
   this.img = unicodeify(baseImg);
 }
 Rook.prototype = new Piece();
 Rook.prototype.getTargets = function(){
   var targets = [];
-  for (var i = this.col; i >= 0; i--) {
+  for (var i = this.col - 1; i >= 0; i--) {
     if (canMoveTo(this.row, i)) {
       targets.push({
         x: this.row,
@@ -38,7 +31,7 @@ Rook.prototype.getTargets = function(){
       break;
     }
   }
-  for (var j = this.col; j <= 7; j++) {
+  for (var j = this.col + 1; j <= 7; j++) {
     if (canMoveTo(this.row, j)) {
       targets.push({
         x: this.row,
@@ -48,7 +41,7 @@ Rook.prototype.getTargets = function(){
       break;
     }
   }
-  for (var k = this.row; k >= 0; k--) {
+  for (var k = this.row - 1; k >= 0; k--) {
     if (canMoveTo(k, this.col)) {
       targets.push({
         x: k,
@@ -58,7 +51,7 @@ Rook.prototype.getTargets = function(){
       break;
     }
   }
-  for (var l = this.row; l <=7; l++) {
+  for (var l = this.row + 1; l <=7; l++) {
     if (canMoveTo(l, this.col)) {
       targets.push({
         x: l,
@@ -73,7 +66,7 @@ Rook.prototype.getTargets = function(){
 
 function Bishop (row, col, color){
   Piece.call(this, row, col, color);
-  var baseImg = 'white' ? '2657' : '265D';
+  var baseImg = this.color === 'white' ? '2657' : '265D';
   this.img = unicodeify(baseImg);
 }
 Bishop.prototype = new Piece();
@@ -86,7 +79,7 @@ Bishop.prototype.getTargets = function(){
     dr : true
   };
   for (var i = 1; i < 5; i++) {
-    if (dirs.ul && canMoveTo(row - i, col - i)) {
+    if (dirs.ul && canMoveTo(this.row - i, this.col - i)) {
       targets.push({
         x: row - i,
         y: col - i,
@@ -136,7 +129,7 @@ Bishop.prototype.getTargets = function(){
 
 function Queen (row, col, color){
   Piece.call(this, row, col, color);
-  var baseImg = 'white' ? '2655' : '265B';
+  var baseImg = this.color === 'white' ? '2655' : '265B';
   this.img = unicodeify(baseImg);
 }
 Queen.prototype = new Piece();
@@ -148,7 +141,7 @@ Queen.prototype.getTargets = function(){
 
 function Knight (row, col, color){
   Piece.call(this, row, col, color);
-  var baseImg = 'white' ? '2658' : '265E';
+  var baseImg = this.color === 'white' ? '2658' : '265E';
   this.img = unicodeify(baseImg);
 }
 Knight.prototype = new Piece();
@@ -160,16 +153,16 @@ Knight.prototype.getTargets = function(){
     } else if (Math.abs(i) === 1) {
       column = 2;
     }
-    if (canMoveTo(i, column)) {
+    if (canMoveTo(this.row + i, this.col + column)) {
       targets.push({
-        x: i,
-        y: column
+        x: this.row + i,
+        y: this.col + column
       });
     }
-    if (canMoveTo(i, (column * -1))) {
+    if (canMoveTo(this.row + i, this.col + (column * -1))) {
       targets.push({
-        x: i,
-        y: (column * -1)
+        x: this.row + i,
+        y: this.col + (column * -1)
       });
     }
   }
@@ -180,7 +173,7 @@ function Pawn (row, col, color, dir){
   this.hasMoved = false;
   this.dir = dir;
   Piece.call(this, row, col, color);
-  var baseImg = 'white' ? '2659' : '265F';
+  var baseImg = this.color === 'white' ? '2659' : '265F';
   this.img = unicodeify(baseImg);
 }
 Pawn.prototype = new Piece();
@@ -189,28 +182,28 @@ Pawn.prototype.getTargets = function() {
   var dir = this.color === 'black' ? 1 : -1;
   var row = this.row + dir;
   var col = this.col;
-  if (isOnBoard(row, col) && isEmpty(row, col)) {
+  if (isOnBoard(row, col) && isEmpty(getCell(row, col))) {
     targets.push({
-      x: col,
-      y: row
+      x: row,
+      y: col
     });
   }
-  if (!this.hasMoved && isOnBoard(row, col) && isEmpty(row + dir, col)) {
+  if (!this.hasMoved && isOnBoard(row + dir, col) && isEmpty(getCell(row + dir, col))) {
     targets.push({
-      x: col,
-      y: row + dir
+      x: row + dir,
+      y: col
     });
   }
   if (isEnemy(row, col + 1)) {
     targets.push({
-      x: row,
-      y: col + 1
+      x: row + 1,
+      y: col
     });
   }
   if (isEnemy(row, col - 1)) {
     targets.push({
-      x: row,
-      y: col - 1
+      x: row - 1,
+      y: col
     });
   }
   return targets;
@@ -218,7 +211,7 @@ Pawn.prototype.getTargets = function() {
 
 function King (row, col, color) {
   Piece.call(this, row, col, color);
-  var baseImg = 'white' ? '2654' : '265A';
+  var baseImg = this.color === 'white' ? '2654' : '265A';
   this.img = unicodeify(baseImg);
 }
 
@@ -235,6 +228,7 @@ King.prototype.getTargets = function (){
       }
     }
   }
+  return targets;
 };
 
 function unicodeify (str){
@@ -260,5 +254,11 @@ function isEnemy(x, y) {
   }
 }
 function getCell(x, y){
-  return board[x][y];
+  return isOnBoard(x, y) ? board[x][y] : null;
 }
+var board = [
+  [new Rook(0,0,'black'), new Knight(0,1,'black'), new Bishop(0,2,'black'), new Queen(0,3,'black'), new King(0,4,'black'), new Bishop(0,5,'black'), new Knight(0,6,'black'), new Rook(0,7,'black')],
+  [new Pawn(1,0,'black'), new Pawn(1,1,'black'), new Pawn(1,2,'black'), new Pawn(1,3,'black'), new Pawn(1,4,'black'), new Pawn(1,5,'black'), new Pawn(1,6,'black'), new Pawn(1,7,'black')],
+  new Array(8),new Array(8),new Array(8),new Array(8),
+  [new Pawn(6,0,'white'), new Pawn(6,1,'white'), new Pawn(6,2,'white'), new Pawn(6,3,'white'), new Pawn(6,4,'white'), new Pawn(6,5,'white'), new Pawn(6,6,'white'), new Pawn(6,7,'white')],
+  [new Rook(7,0,'white'), new Knight(7,1,'white'), new Bishop(7,2,'white'), new Queen(7,3,'white'), new King(7,4,'white'), new Bishop(7,5,'white'), new Knight(7,6,'white'), new Rook(7,7,'white')]];
