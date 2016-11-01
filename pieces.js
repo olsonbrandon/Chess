@@ -6,12 +6,11 @@ function Piece (row, col, color){
   this.color = color;
   this.img = null;
 }
-Piece.prototype.board = board;
 Piece.prototype.moveTo = function(x, y){
-  Piece.prototype.board[x][y] = this;
-  // Piece.prototype.board[this.row][this.col]
-  this.row = x;
-  this.col = y;
+  board[x][y] = this;
+  deletePiece(this.row, this.col);
+  this.row = Number(x);
+  this.col = Number(y);
 };
 function Rook (row, col, color){
   Piece.call(this, row, col, color);
@@ -30,6 +29,9 @@ Rook.prototype.getTargets = function(){
     } else {
       break;
     }
+    if (isEnemy(this.row, i)) {
+      break;
+    }
   }
   for (var j = this.col + 1; j <= 7; j++) {
     if (canMoveTo(this.row, j)) {
@@ -38,6 +40,9 @@ Rook.prototype.getTargets = function(){
         y: j
       });
     } else {
+      break;
+    }
+    if (isEnemy(this.row, j)) {
       break;
     }
   }
@@ -50,6 +55,9 @@ Rook.prototype.getTargets = function(){
     } else {
       break;
     }
+    if (isEnemy(k, this.col)) {
+      break;
+    }
   }
   for (var l = this.row + 1; l <=7; l++) {
     if (canMoveTo(l, this.col)) {
@@ -58,6 +66,9 @@ Rook.prototype.getTargets = function(){
         y:this.col
       });
     } else {
+      break;
+    }
+    if (isEnemy(l, this.col)) {
       break;
     }
   }
@@ -78,11 +89,11 @@ Bishop.prototype.getTargets = function(){
     dl : true,
     dr : true
   };
-  for (var i = 1; i < 5; i++) {
+  for (var i = 1; i < 7; i++) {
     if (dirs.ul && canMoveTo(this.row - i, this.col - i)) {
       targets.push({
-        x: row - i,
-        y: col - i,
+        x: this.row - i,
+        y: this.col - i,
       });
       if (isEnemy(this.row - i, this.col - i)) {
         dirs.ul = false;
@@ -92,8 +103,8 @@ Bishop.prototype.getTargets = function(){
     }
     if (dirs.ur && canMoveTo(this.row - i, this.col + i)) {
       targets.push({
-        x: row - i,
-        y: col + i,
+        x: this.row - i,
+        y: this.col + i,
       });
       if (isEnemy(this.row - i, this.col + i)) {
         dirs.ur = false;
@@ -103,8 +114,8 @@ Bishop.prototype.getTargets = function(){
     }
     if (dirs.dl && canMoveTo(this.row + i, this.col - i)) {
       targets.push({
-        x: row + i,
-        y: col - i
+        x: this.row + i,
+        y: this.col - i
       });
       if (isEnemy(this.row + i, this.col - i)) {
         dirs.dl = false;
@@ -114,8 +125,8 @@ Bishop.prototype.getTargets = function(){
     }
     if (dirs.dr && canMoveTo(this.row + i, this.col + i)) {
       targets.push({
-        x: row + i,
-        y: col + i
+        x: this.row + i,
+        y: this.col + i
       });
       if (isEnemy(this.row + i, this.col + i)) {
         dirs.dr = false;
@@ -147,7 +158,10 @@ function Knight (row, col, color){
 Knight.prototype = new Piece();
 Knight.prototype.getTargets = function(){
   var targets = [];
-  for (var i = -2; i <= 2; i++) {
+  for (var i = -2, column; i <= 2; i++) {
+    if (i === 0) {
+      continue;
+    }
     if (Math.abs(i) === 2) {
       column = 1;
     } else if (Math.abs(i) === 1) {
@@ -196,17 +210,22 @@ Pawn.prototype.getTargets = function() {
   }
   if (isEnemy(row, col + 1)) {
     targets.push({
-      x: row + 1,
-      y: col
+      x: row,
+      y: col + 1
     });
   }
   if (isEnemy(row, col - 1)) {
     targets.push({
-      x: row - 1,
-      y: col
+      x: row,
+      y: col -1
     });
   }
   return targets;
+};
+
+Pawn.prototype.moveTo = function(x, y){
+  Piece.prototype.moveTo.call(this, x, y);
+  this.hasMoved = true;
 };
 
 function King (row, col, color) {
@@ -218,8 +237,8 @@ function King (row, col, color) {
 King.prototype = new Piece();
 King.prototype.getTargets = function (){
   var targets = [];
-  for (var i = -1; i <= 1; i++) { //row offset
-    for (var j = -1; i <=1; j++) { // col offset
+  for (var i = -1; i <= 1; i++) {
+    for (var j = -1; j <= 1; j++) {
       if (canMoveTo(this.row + i, this.col + j)) {
         targets.push({
           x: this.row + i,
@@ -255,6 +274,9 @@ function isEnemy(x, y) {
 }
 function getCell(x, y){
   return isOnBoard(x, y) ? board[x][y] : null;
+}
+function deletePiece(x, y) {
+  board[x][y] = null;
 }
 var board = [
   [new Rook(0,0,'black'), new Knight(0,1,'black'), new Bishop(0,2,'black'), new Queen(0,3,'black'), new King(0,4,'black'), new Bishop(0,5,'black'), new Knight(0,6,'black'), new Rook(0,7,'black')],

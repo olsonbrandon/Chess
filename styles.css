@@ -15,14 +15,17 @@
   height: 10vw;
   font-size: 7vw;
   text-align: center;
+  vertical-align: middle;
   cursor: default;
 }
 .row{
   height: 10vw;
 }
 .highlight{
-  box-shadow: 0 0 .25vw .25vw #f44b59;
+  /*box-shadow: 0 0 .25vw .25vw #f44b59;*/
+  background-color: yellow;
 }
 .highlight-select{
-  box-shadow: 0 0 .25vw .25vw #9ecaed;
+  /*box-shadow: 0 0 .25vw .25vw #9ecaed;*/
+  background-color:yellow;
 }

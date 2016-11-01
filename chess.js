@@ -1,4 +1,25 @@
 $(document).ready(function(){
+
+  boardSetup();
+  var selection;
+
+  $('.cell').click(function(){
+    var getId = $(this).attr('id');
+    var cell = board[getId[0]][getId[1]];
+    if(cell && cell.color === currTurn){
+      selection = cell;
+      var targets = cell.getTargets();
+      highlightTargets(targets);
+      $(this).addClass('highlight-select');
+    }
+    else if ($(this).hasClass('highlight')) {
+      clearHighlight();
+      movePiece(getId[0], getId[1]);
+      selection.moveTo(getId[0], getId[1]);
+    }
+
+  });
+
   function boardSetup () {
     for(var i = 0, row; i < 8; i++){
       row = $('<div class="row">');
@@ -17,18 +38,6 @@ $(document).ready(function(){
     }
     return cell;
   }
-  boardSetup();
-
-  $('.cell').click(function(){
-    var getId = $(this).attr('id');
-    var piece = board[getId[0]][getId[1]];
-    if(piece && piece.color === currTurn){
-      var targets = piece.getTargets();
-      highlightTargets(targets);
-      $(this).addClass('highlight-select');
-    }
-
-  });
   function highlightTargets(targets){
     clearHighlight();
     for (var i = 0; i < targets.length; i++) {
@@ -38,9 +47,16 @@ $(document).ready(function(){
   function highlightCell(target){
     $('#' + target.x.toString() + target.y.toString()).addClass('highlight');
   }
-
   function clearHighlight(){
     $('.highlight').removeClass('highlight');
     $('.highlight-select').removeClass('highlight-select');
+  }
+  function movePiece(row, col){
+    $('#' + row + col).html(selection.img);
+    removeSelectedPiece();
+    currTurn = currTurn === 'white' ? 'black' : 'white';
+  }
+  function removeSelectedPiece(){
+    $('#' + selection.row + selection.col).html('');
   }
 });
