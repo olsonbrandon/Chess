@@ -191,30 +191,30 @@ function Pawn (row, col, color, dir){
   this.img = unicodeify(baseImg);
 }
 Pawn.prototype = new Piece();
-Pawn.prototype.getTargets = function() {
+Pawn.prototype.getTargets = function(forCheck) {
   var targets = [];
   var dir = this.color === 'black' ? 1 : -1;
   var row = this.row + dir;
   var col = this.col;
-  if (isOnBoard(row, col) && isEmpty(getCell(row, col))) {
+  if (!forCheck && isOnBoard(row, col) && isEmpty(getCell(row, col))) {
     targets.push({
       x: row,
       y: col
     });
   }
-  if (!this.hasMoved && isOnBoard(row + dir, col) && isEmpty(getCell(row + dir, col))) {
+  if (!forCheck && !this.hasMoved && isOnBoard(row + dir, col) && isEmpty(getCell(row + dir, col)) && isEmpty(getCell(row, col))) {
     targets.push({
       x: row + dir,
       y: col
     });
   }
-  if (isEnemy(row, col + 1)) {
+  if (forCheck || isEnemy(row, col + 1)) {
     targets.push({
       x: row,
       y: col + 1
     });
   }
-  if (isEnemy(row, col - 1)) {
+  if (forCheck || isEnemy(row, col - 1)) {
     targets.push({
       x: row,
       y: col -1
@@ -239,7 +239,7 @@ King.prototype.getTargets = function (){
   var targets = [];
   for (var i = -1; i <= 1; i++) {
     for (var j = -1; j <= 1; j++) {
-      if (canMoveTo(this.row + i, this.col + j)) {
+      if (canMoveTo(this.row + i, this.col + j) && (this.color !== currTurn || !this.willBeInCheck(this.row + i, this.col + j))) {
         targets.push({
           x: this.row + i,
           y: this.col + j
@@ -249,7 +249,15 @@ King.prototype.getTargets = function (){
   }
   return targets;
 };
-
+King.prototype.willBeInCheck = function (x, y){
+  var possibleEnemyMoves = getAllEnemiesTars();
+  for (var i = 0; i < possibleEnemyMoves.length; i++) {
+    if (possibleEnemyMoves[i].x === x && possibleEnemyMoves[i].y === y) {
+      return true;
+    }
+  }
+  return false;
+};
 function unicodeify (str){
   return String.fromCharCode(parseInt(str, 16));
 }
@@ -277,6 +285,26 @@ function getCell(x, y){
 }
 function deletePiece(x, y) {
   board[x][y] = null;
+}
+function allEnemies(){
+  var enemies = [];
+  for (var i = 0; i < 8; i++) {
+    for (var j = 0; j < 8; j++) {
+      if (!isEmpty(board[i][j]) && board[i][j].color !== currTurn) {
+        enemies.push(board[i][j]);
+      }
+    }
+  }
+  return enemies;
+}
+function getAllEnemiesTars(){
+  var possibleEnemyMoves = [];
+  var enemies = allEnemies();
+  for (var k = 0; k < enemies.length; k++) {
+    var enemy = enemies[k];
+    possibleEnemyMoves = possibleEnemyMoves.concat(enemy.getTargets(true));
+  }
+  return possibleEnemyMoves;
 }
 var board = [
   [new Rook(0,0,'black'), new Knight(0,1,'black'), new Bishop(0,2,'black'), new Queen(0,3,'black'), new King(0,4,'black'), new Bishop(0,5,'black'), new Knight(0,6,'black'), new Rook(0,7,'black')],
